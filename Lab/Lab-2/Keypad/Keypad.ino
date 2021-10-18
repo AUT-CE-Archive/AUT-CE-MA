@@ -47,17 +47,17 @@ void loop() {
     Serial.println(range);
 
     // LEDs    
-    goHigh(range);    
+    goHigh(range);
   }
-
-  if (Serial.available()) {  
+  
+  if (Serial.available()) {
     int range = Serial.parseInt();
 
     if (range >= 1 && range <= 9)
       goHigh(range);
     else
       Serial.println("Invalid number");
-  }  
+  }
   
   goLow();
 }
