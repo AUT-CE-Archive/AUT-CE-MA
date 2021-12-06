@@ -1,4 +1,4 @@
-#include <Wire.h>           // TWI Protocol library
+#include <Wire.h>
 #include <Keypad.h>         // Keypad library
 #include <LiquidCrystal.h>  // Terminal library
 
@@ -33,123 +33,78 @@ Keypad keypad = Keypad(makeKeymap(key), rowPins, colPins, rows, cols);
 #define LC_PIN4 2
 LiquidCrystal lcd(RS_PIN, EN_PIN, LC_PIN1, LC_PIN2, LC_PIN3, LC_PIN4);
 
+// EEPROM variables
+#define DEVICE_ADDRESS 0b1010000
+#define TRANSFER_SIZE 4
+uint8_t data[TRANSFER_SIZE] = {0};
+uint8_t read_data[TRANSFER_SIZE] = {0};
 
-int selectedMode; // Selected mode
-bool isWorking;   // Status of the device
-int duration;     // Duration for which the action is being performed
-int start;        // The start time of the action
-int i;            // Global variable for loops
+// Machine variables
+#define STEP 0.2        // STEP for delay
+int selectedMode = -1;  // Selected mode
+bool busy = false;      // Status of the device
+int remainings[4] = {0};
+
 
 void setup() {
   // LED setup
-  for (i = 0; i < sizeof(LED_PINS)/sizeof(LED_PINS[0]); i++) {
+  for (int i = 0; i < sizeof(LED_PINS)/sizeof(LED_PINS[0]); i++) {
     pinMode(LED_PINS[i], OUTPUT);
     digitalWrite(LED_PINS[i], LOW);
   }
 
-  // Serial setup
   Wire.begin();
   Serial.begin(9600);
 
   // Keypad setup
-  for (i = 0; i < sizeof(rowPins)/sizeof(rowPins[0]); i++) {
+  for (int i = 0; i < sizeof(rowPins)/sizeof(rowPins[0]); i++) {
     pinMode(rowPins[i], OUTPUT);
     digitalWrite(rowPins[i], HIGH);
   }
-  for (i = 0; i < sizeof(colPins)/sizeof(colPins[0]); i++) {
+  for (int i = 0; i < sizeof(colPins)/sizeof(colPins[0]); i++) {
     pinMode(colPins[i], OUTPUT);
     digitalWrite(colPins[i], HIGH);
   }
 
-  // LCD setup and display modes
-  lcd.begin(20,4);
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.println("1.Pre-Wash");
-  lcd.setCursor(0, 1);
-  lcd.println("2.Tide-Wash");
-  lcd.setCursor(0, 2);
-  lcd.println("3.Water-Wash");
-  lcd.setCursor(0, 3);
-  lcd.println("4.Dry-Wash");
+  int arr[] = {1, 2, 3, 4};
 
-  isWorking = false;
+//  machineWriteMemory(remainings, TRANSFER_SIZE);
+//  machineReadMemory(TRANSFER_SIZE);
+
+  show_menu();    // Show menu
 }
 
 
 void loop() {
-  char mode = keypad.getKey();
+  char key = keypad.getKey();
+  int _key = key - '0';
 
-  if (mode == '#')
-    lcd.print('AAAAAAAAAAAAA');
-
-  if (mode) {
-    // Select a mode if not already working
-    if (!isWorking)
-      selectModeAndTime(mode - '0');
-    else if (isWorking && mode == '#')
-      holdWork();
+  if (key) {
+    if (!busy && (_key >= 1 && _key < 5))
+      start(_key - 1);  // Start working
+    else if (busy && key == '#')
+      hold();       // Halt working
   }
 
-  if (isWorking) {
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print(duration - (millis() - start) / 1000);
-    lcd.println("s remaining...");
-    lcd.setCursor(0, 1);
-    lcd.println("Press # to hold.");
-    delay(1000);
+  if (busy) {
+    if (selectedMode < 4)
+      work();       // Continue working   
+    else
+      finish();     // Finish working
   }
 }
 
-// Selects a mode and time
-void selectModeAndTime(int mode) {
-  if (mode > 0 && mode < 5) {
-    highLED(mode - 1);
-    selectedMode = mode;
 
-    // Clear the LCD
-    lcd.clear();
-    lcd.setCursor(0,0);
-    lcd.println("For How Long?");
-    lcd.setCursor(0,1);
-    lcd.println("Press * to submit.");
-    lcd.setCursor(0,2);
-    lcd.print("Value: ");
-
-    // Set duration (0-9)
-    duration = keypad.waitForKey() - '0';
-    lcd.print(duration);
-
-    // Start
-    start = millis();
-    isWorking = true;
-  }
+// Interface for writing in memory
+void machineWriteMemory(int arr[], int _size) { 
+  memset(data, 0, _size);
+  sprintf(data, "%d%d%d%d",arr[0], arr[1], arr[2], arr[3]);  
+  memory_write(345, data, TRANSFER_SIZE);
 }
 
-// Set the target LED to HIGH and others to LOW
-void highLED(int id) {
-  for (i = 0; i < sizeof(LED_PINS)/sizeof(LED_PINS[0]); i++) {
-    if (i != id)
-      digitalWrite(LED_PINS[i], LOW);
-    else digitalWrite(LED_PINS[i], HIGH);
-  }
-}
 
-// Holds the current action in the selected mode
-void holdWork() {
-
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.println("Work halted.");
-  lcd.println("Press # to resume.");
-
-  // Save the remaining time
-  duration -= (millis() - start) / 1000;
-
-  while (true) {
-    char key = keypad.waitForKey();
-    if (key == '#') break;
-  }
-  start = millis();
+// Interface for reading from memory
+void machineReadMemory(int _size) {
+  memset(read_data, 0, TRANSFER_SIZE);
+  memory_read(345, read_data, TRANSFER_SIZE);
 }
