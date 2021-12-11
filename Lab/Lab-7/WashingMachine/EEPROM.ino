@@ -15,7 +15,7 @@ void memory_write(uint16_t memory_address, uint8_t* data, uint8_t _size) {
 
   Serial.print(" Wrote: ");
   for (int i = 0; i < _size; i++)
-    Serial.print((char)data[i]);
+    Serial.print(data[i]);
   Serial.println();
 }
 
@@ -36,6 +36,6 @@ void memory_read(uint16_t memory_address, uint8_t* data, uint8_t _size) {
 
   Serial.print(" Read: ");
   for (int i = 0; i < _size; i++)
-    Serial.print((char)data[i]);
+    Serial.print(data[i]);
   Serial.println();
 }

@@ -25,9 +25,12 @@ void start(int mode) {
   // Set tracking variables
   selectedMode = mode;
   busy = true;
-  int remaining = keypad.waitForKey() - '0' + 1 - STEP;  
-  for (int i = selectedMode; i < 4; i++)
-    remainings[i] = remaining;  
+  int remaining = keypad.waitForKey() - '0';  
+  for (int i = 0; i < 4; i++)
+    if (i >= selectedMode)
+      remainings[i] = remaining;
+    else
+      remainings[i] = 0;    
 
   for (int i = 0; i < 4; i++)
     digitalWrite(LED_PINS[i], LOW);  
@@ -53,10 +56,14 @@ void hold() {
 
 // Work
 void work() {
-
-  // Save the current remaining time to memory
-  machineReadMemory(TRANSFER_SIZE);
   
+  // Save the current remaining time to memory
+  if (first_read != 0)
+    memory_read(345, remainings, TRANSFER_SIZE);
+  else
+    first_read = 1;
+
+//  Serial.println("1");
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("Current: ");
@@ -65,17 +72,21 @@ void work() {
   lcd.print(int(remainings[selectedMode]));
   lcd.println("s remaining...");
   lcd.setCursor(0, 2);
+//  Serial.println("2");
   lcd.println("Press # to hold.");
+//  Serial.println("3");
 
   remainings[selectedMode] -= 1;
-  delay(1000);
+  delay(1000); 
+//  Serial.println("4");
 
   // Save the new remaining time to memory
-  machineWriteMemory(remainings, TRANSFER_SIZE);
+  memory_write(345, remainings, TRANSFER_SIZE);
 
   // Go to next mode if timer is up
-  if (remainings[selectedMode] <= 0)
+  if (remainings[selectedMode] <= 0) {
     nextMode();
+  }
 }
 
 

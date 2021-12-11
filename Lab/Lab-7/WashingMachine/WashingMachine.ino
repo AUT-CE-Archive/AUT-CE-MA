@@ -36,14 +36,14 @@ LiquidCrystal lcd(RS_PIN, EN_PIN, LC_PIN1, LC_PIN2, LC_PIN3, LC_PIN4);
 // EEPROM variables
 #define DEVICE_ADDRESS 0b1010000
 #define TRANSFER_SIZE 4
-uint8_t data[TRANSFER_SIZE] = {0};
-uint8_t read_data[TRANSFER_SIZE] = {0};
+bool first_read = false;
 
 // Machine variables
-#define STEP 0.2        // STEP for delay
+#define STEP 0.2
 int selectedMode = -1;  // Selected mode
 bool busy = false;      // Status of the device
-int remainings[4] = {0};
+uint8_t remainings[4] = {0};
+bool program_remaining = false;
 
 
 void setup() {
@@ -68,10 +68,17 @@ void setup() {
 
   int arr[] = {1, 2, 3, 4};
 
-//  machineWriteMemory(remainings, TRANSFER_SIZE);
-//  machineReadMemory(TRANSFER_SIZE);
+  memory_read(345, remainings, TRANSFER_SIZE);
+  for (int i = 0; i < TRANSFER_SIZE; i++)
+    if (remainings[i] != 0) {
+        program_remaining = true;
+        selectedMode = i;
+        busy = true;
+        break;
+    }
 
-  show_menu();    // Show menu
+  if (program_remaining == false)
+    show_menu();    // Show menu      
 }
 
 
@@ -92,19 +99,4 @@ void loop() {
     else
       finish();     // Finish working
   }
-}
-
-
-// Interface for writing in memory
-void machineWriteMemory(int arr[], int _size) { 
-  memset(data, 0, _size);
-  sprintf(data, "%d%d%d%d",arr[0], arr[1], arr[2], arr[3]);  
-  memory_write(345, data, TRANSFER_SIZE);
-}
-
-
-// Interface for reading from memory
-void machineReadMemory(int _size) {
-  memset(read_data, 0, TRANSFER_SIZE);
-  memory_read(345, read_data, TRANSFER_SIZE);
 }
