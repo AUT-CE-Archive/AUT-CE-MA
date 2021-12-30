@@ -27,11 +27,11 @@ Project File Date:  12/29/2021
 <h2>Output:</h2>
 *** Using Compiler 'V6.14', folder: 'E:\Softwares\Keil MDK\ARM\ARMCLANG\Bin'
 Rebuild target 'Target 1'
-"blinkblink.s", line 135: Warning: A1581W: Added 2 bytes of padding at address 0xe6
-  135 000000e8  END  
+assembling startup_SAM3N.s...
+"blinkblink.s", line 138: Warning: A1581W: Added 2 bytes of padding at address 0xf2
+  138 000000f4  END  
 0 Errors, 1 Warning
 assembling blinkblink.s...
-assembling startup_SAM3N.s...
 RTE/Device/ATSAM3N4A/system_SAM3N.c(206): warning: 'EFC_FMR_Val' is not defined, evaluates to 0 [-Wundef]
 #if (CHECK_RSVD((EFC_FMR_Val),  ~0x01000F01))
                  ^
@@ -51,7 +51,7 @@ RTE/Device/ATSAM3N4A/system_SAM3N.c(426): warning: implicit conversion changes s
 compiling system_SAM3N.c...
 linking...
 .\Objects\micro.sct(8): warning: L6314W: No section matches pattern *(InRoot$$Sections).
-Program Size: Code=456 RO-data=192 RW-data=0 ZI-data=1024  
+Program Size: Code=468 RO-data=192 RW-data=0 ZI-data=1024  
 Finished: 0 information, 1 warning and 0 error messages.
 FromELF: creating hex file...
 ".\Objects\micro.axf" - 0 Error(s), 6 Warning(s).
@@ -80,11 +80,11 @@ Package Vendor: Microchip
    * Component: ARM::CMSIS:CORE:5.4.0
 
    * Component: Microchip::Device:Startup:1.0.0
-      Source file:   armcc\Device\SAM3N\Source\ARM\startup_SAM3N.s
+      Source file:   templates\main.c
+      Include file:  include\sam.h
       Source file:   templates\main.cpp
       Source file:   armcc\Device\SAM3N\Source\system_SAM3N.c
-      Include file:  include\sam.h
-      Source file:   templates\main.c
+      Source file:   armcc\Device\SAM3N\Source\ARM\startup_SAM3N.s
 Build Time Elapsed:  00:00:01
 </pre>
 </body>
