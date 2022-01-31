@@ -1,0 +1,26 @@
+	AREA myCode, CODE, READONLY
+	EXPORT __main
+	ENTRY
+
+MEM_LOC EQU 0x20000000;			SRAM init
+
+__main
+	MOV R0, #0x05000000;		R0 = 5000000
+	MOV R1, #1;					i = 1
+	LDR R2,	=0;
+	B loop
+
+loop
+	ADDS R1, #1;				i++
+	CMP R1, #11;				i == 11?
+	BEQ finish
+	
+	MOV R3, R0;					Make a copy of R0
+	LDR R2, [R3, R3, LSR R1]!;	R3 = R3 + (R3 / 2^i), some random value is then loaded to R2 (don't care about it)
+	SUB R3, R3, R0;				R3 = R3 - R0 (Now we have the pure R3/2^i)
+	STR R3, [MEM_LOC, R1];		Store R3 at MEM_LOC + i
+
+finish
+
+done B done
+	END

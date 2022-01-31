@@ -1,0 +1,21 @@
+	AREA myCode, CODE, READONLY
+	EXPORT __main
+	ENTRY
+
+__main
+	MOV R0, #0;			R0 = 0
+	MOV R1, #0;			R1 = 1
+	MOV R2, #2;			R2 = 2
+	B loop
+
+loop
+	ADDS R0, R0, #1;	R0++
+	CMP R1, #0;			R1 == 0?
+	BEQ increment
+	B loop
+
+increment
+	ADD R2, R2, #1
+ 
+done B done
+	END

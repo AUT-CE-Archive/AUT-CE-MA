@@ -1,0 +1,47 @@
+	AREA myCode, CODE, READONLY
+	EXPORT __main
+	ENTRY
+
+__main
+	MOV R0, #13;	Number	
+	MOV R1, R0
+	MOV R2, #2;		Counter (Divider)
+	
+	; 1 is not prime
+	CMP R0, #1
+	BEQ NOT_PRIME
+	
+	; 2 is a prime
+	CMP R0, #2
+	BEQ IS_PRIME	
+
+CYCLE
+	BL DIVIDE
+	CMP R8, #0;		R8 == 0?
+	BEQ NOT_PRIME
+	ADD R2, R2, #1;	Increment
+	CMP R2, R1;		R1 == R2?
+	BEQ IS_PRIME;	is prime!
+	B CYCLE
+
+IS_PRIME
+	MOV R3, #0x11111111
+	B FINISH
+
+NOT_PRIME
+	MOV R3, #0x00000000
+FINISH B FINISH
+
+DIVIDE
+	MOV R8, R0
+	MOV R9, R2
+
+LOOP
+	SUB R8, R8, R9
+	ADD R10, R10, #01
+	CMP R8, R9
+	BPL LOOP
+	MOV PC, LR
+
+DONE B DONE
+	END
